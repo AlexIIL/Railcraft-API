@@ -33,9 +33,9 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public interface IElectricMinecart {
 
-    public ChargeHandler getChargeHandler();
+    ChargeHandler getChargeHandler();
 
-    public static final class ChargeHandler {
+    final class ChargeHandler {
 
         public static final int DRAW_INTERVAL = 8;
         private static final Random rand = new Random();
@@ -208,13 +208,10 @@ public interface IElectricMinecart {
          *  }
          * }
          * </pre></blockquote>
-         * @param trackX
-         * @param trackY
-         * @param trackZ
          */
-        public void tickOnTrack(int trackX, int trackY, int trackZ) {
+        public void tickOnTrack(BlockPos pos) {
             if (type == Type.USER && charge < capacity && clock % DRAW_INTERVAL == 0) {
-                IElectricGrid track = RailTools.getTrackObjectAt(minecart.worldObj, trackX, trackY, trackZ, IElectricGrid.class);
+                IElectricGridObject track = RailTools.getTrackObjectAt(minecart.worldObj, pos, IElectricGridObject.class);
                 if (track != null) {
                     double drawnFromTrack = track.getChargeHandler().removeCharge(capacity - charge);
                     if (drawnFromTrack > 0.0)

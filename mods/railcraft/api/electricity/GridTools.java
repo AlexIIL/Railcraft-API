@@ -8,30 +8,30 @@
 
 package mods.railcraft.api.electricity;
 
+import mods.railcraft.api.core.WorldCoordinate;
+import mods.railcraft.api.electricity.IElectricGridObject.ChargeHandler.ConnectType;
+import mods.railcraft.api.tracks.ITrackInstance;
+import mods.railcraft.api.tracks.ITrackTile;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.IBlockAccess;
+
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import mods.railcraft.api.core.WorldCoordinate;
-import mods.railcraft.api.electricity.IElectricGrid.ChargeHandler.ConnectType;
-import mods.railcraft.api.tracks.ITrackInstance;
-import mods.railcraft.api.tracks.ITrackTile;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 
 /**
- *
  * @author CovertJaguar <http://www.railcraft.info/>
  */
 public class GridTools {
 
-    public static Set<IElectricGrid> getMutuallyConnectedObjects(IElectricGrid gridObject) {
-        Set<IElectricGrid> connectedObjects = new HashSet<IElectricGrid>();
+    public static Set<IElectricGridObject> getMutuallyConnectedObjects(IElectricGridObject gridObject) {
+        Set<IElectricGridObject> connectedObjects = new HashSet<IElectricGridObject>();
 
         WorldCoordinate myPos = new WorldCoordinate(gridObject.getTile());
         for (Map.Entry<WorldCoordinate, EnumSet<ConnectType>> position : gridObject.getChargeHandler().getPossibleConnectionLocations().entrySet()) {
-            IElectricGrid otherObj = getGridObjectAt(gridObject.getTile().getWorldObj(), position.getKey());
+            IElectricGridObject otherObj = getGridObjectAt(gridObject.getTile().getWorld(), position.getKey());
             if (otherObj != null && position.getValue().contains(otherObj.getChargeHandler().getType())) {
                 EnumSet<ConnectType> otherType = otherObj.getChargeHandler().getPossibleConnectionLocations().get(myPos);
                 if (otherType != null && otherType.contains(gridObject.getChargeHandler().getType()))
@@ -41,20 +41,16 @@ public class GridTools {
         return connectedObjects;
     }
 
-    public static IElectricGrid getGridObjectAt(IBlockAccess world, WorldCoordinate pos) {
-        return getGridObjectAt(world, pos.x, pos.y, pos.z);
-    }
-
-    public static IElectricGrid getGridObjectAt(IBlockAccess world, int x, int y, int z) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public static IElectricGridObject getGridObjectAt(IBlockAccess world, BlockPos pos) {
+        TileEntity tile = world.getTileEntity(pos);
         if (tile == null)
             return null;
-        if (tile instanceof IElectricGrid)
-            return (IElectricGrid) tile;
+        if (tile instanceof IElectricGridObject)
+            return (IElectricGridObject) tile;
         if (tile instanceof ITrackTile) {
             ITrackInstance track = ((ITrackTile) tile).getTrackInstance();
-            if (track instanceof IElectricGrid)
-                return (IElectricGrid) track;
+            if (track instanceof IElectricGridObject)
+                return (IElectricGridObject) track;
         }
         return null;
     }
